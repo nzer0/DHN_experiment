@@ -8,7 +8,7 @@ num_edge = 100000;
 num_gen = 300;
 
 %% Data Read
-data1 = Data('Data/walking2.txt');
+data1 = Data('Data/walking.txt');
 
 %% Data Sampling
 num_data = data1.len-step+1;
@@ -66,12 +66,16 @@ for gen_idx=1:num_gen-step+1
     % high_he = reshape(high_he(end,2:end), 3, []);
     % cur_data = norm_data(data_idx:data_idx+2,:);
     % %%%
-
+    
+%     disp(sum_ranked_importance(:,to_fill_idx-1));
     numer_hn = hn;
     numer_hn(isnan(numer_hn)) = 0;
     to_fill_idx = 1+to_fill:3:(sample_range+1);
-    gen_seq(gen_idx+step-1,:) = ...
+    
+    gen = ...
         ranked_importance' * numer_hn(ranked_idx,to_fill_idx) ./ sum_ranked_importance(:,to_fill_idx-1);
+    gen(isnan(gen)) = gen_seq(gen_idx+step-2,isnan(gen));
+    gen_seq(gen_idx+step-1,:) = gen;
 end
 gen_dat = data1.orig_scale(gen_seq);
 toc;
@@ -80,8 +84,9 @@ toc;
 figure(1);
 clf;
 hold on;
-p1 = data1.orig_data(1:300,17);
-p2 = gen_dat(:,17);
+idx = 10
+p1 = data1.orig_data(1:300,idx);
+p2 = gen_dat(:,idx);
 plot(p1, 'r');
 plot(p2, 'b');
 axis([0,300,0,4000])
