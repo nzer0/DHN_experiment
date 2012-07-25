@@ -1,10 +1,12 @@
+function [err, gen_dat] = DHN(num_edge)
+
 %% Dynamic Hypernetwork
 % All in one version
 
 %% Parameters
 dim = 20;
 step = 3;   he_order = 6;   spat_order = 2;
-num_edge = 100000;
+% num_edge = 200000;
 num_gen = 300;
 
 %% Data Read
@@ -61,13 +63,6 @@ for gen_idx=1:num_gen-step+1
     ranked_importance = importance(ranked_idx);
     sum_ranked_importance = ranked_importance' * ~isnan(hn(ranked_idx,2:end));
 
-    % % DEBUG
-    % high_he = hn(sorted_idx,:);
-    % high_he = reshape(high_he(end,2:end), 3, []);
-    % cur_data = norm_data(data_idx:data_idx+2,:);
-    % %%%
-    
-%     disp(sum_ranked_importance(:,to_fill_idx-1));
     numer_hn = hn;
     numer_hn(isnan(numer_hn)) = 0;
     to_fill_idx = 1+to_fill:3:(sample_range+1);
@@ -83,14 +78,18 @@ toc;
 %% Figure
 figure(1);
 clf;
-hold on;
-idx = 10
-p1 = data1.orig_data(1:300,idx);
-p2 = gen_dat(:,idx);
-plot(p1, 'r');
-plot(p2, 'b');
-axis([0,300,0,4000])
-dtw(p1',p2')
+err = 0;
+for idx = 1:data1.dim
+    subplot(4,5,idx);
+    p1 = data1.orig_data(1:300,idx);
+    p2 = gen_dat(:,idx);
+    hold on;
+    plot(p1, 'r');
+    plot(p2, 'b');
+    axis([0,300,0,4000])
+    err = err + dtw(p1',p2');
+end
+disp(err);
 
 
 
