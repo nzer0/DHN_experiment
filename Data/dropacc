@@ -1,0 +1,16 @@
+#!/usr/bin/perl
+use strict;
+use warnings;
+
+my $fn = $ARGV[0];
+my @spt = split /\./, $fn;
+
+open FIN, $fn or die $!;
+open FOUT, "> $spt[0]_accdrop.txt" or die $!;
+while(my $line = <FIN>){
+	my @list = split /\t/, $line;
+	for my $i (0..19){
+		print FOUT $list[$i], "\t";
+	}
+	print FOUT "\n";
+}

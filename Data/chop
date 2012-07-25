@@ -1,0 +1,7 @@
+#!/usr/bin/perl
+use warnings;
+use strict;
+while(my $l = <>){
+	print substr($l, 0, -2), "\n";
+}
+
