@@ -1,11 +1,12 @@
-function [err, gen_dat] = DHN(num_edge)
+function [err, gen_dat] = DHN(num_edge, step)
 
 %% Dynamic Hypernetwork
 % All in one version
 
 %% Parameters
 dim = 20;
-step = 3;   he_order = 6;   spat_order = 2;
+% step = 3;   
+he_order = 6;   spat_order = 2;
 % num_edge = 200000;
 num_gen = 300;
 
@@ -22,7 +23,7 @@ hn = zeros(num_edge, sample_range+1);
 data_sample = randsample(1:num_data, num_edge, true);
 
 % Initial sample
-tic;
+% tic;
 edge_idx = 0;
 for data_idx=data_sample
     sampling_data = data1.norm_data(data_idx:data_idx+step-1,:);
@@ -34,15 +35,15 @@ for data_idx=data_sample
     edge_idx = edge_idx + 1;
     hn(edge_idx,:) = he;
 end
-toc;
-fprintf('sampling completed\n');
+% toc;
+% fprintf('sampling completed\n');
 
 %% Generate the data
 to_fill = step;
 
 gen_seq = zeros(num_gen, dim);
 gen_seq(1:step-1,:) = data1.norm_data(1:step-1,:);
-tic;
+% tic;
 for gen_idx=1:num_gen-step+1
     % build matcher
     matcher = gen_seq(gen_idx:gen_idx+step-1,:);
@@ -65,7 +66,7 @@ for gen_idx=1:num_gen-step+1
 
     numer_hn = hn;
     numer_hn(isnan(numer_hn)) = 0;
-    to_fill_idx = 1+to_fill:3:(sample_range+1);
+    to_fill_idx = 1+to_fill:step:(sample_range+1);
     
     gen = ...
         ranked_importance' * numer_hn(ranked_idx,to_fill_idx) ./ sum_ranked_importance(:,to_fill_idx-1);
@@ -73,23 +74,20 @@ for gen_idx=1:num_gen-step+1
     gen_seq(gen_idx+step-1,:) = gen;
 end
 gen_dat = data1.orig_scale(gen_seq);
-toc;
+% toc;
 
-%% Figure
-figure(1);
-clf;
 err = 0;
 for idx = 1:data1.dim
     subplot(4,5,idx);
-    p1 = data1.orig_data(1:300,idx);
-    p2 = gen_dat(:,idx);
-    hold on;
-    plot(p1, 'r');
-    plot(p2, 'b');
-    axis([0,300,0,4000])
+    p1 = data1.orig_data(1:num_gen,idx);
+    p2 = gen_dat(1:num_gen,idx);
+%     hold on;
+%     plot(p1, 'r');
+%     plot(p2, 'b');
+%     axis([0,300,0,4000])
     err = err + dtw(p1',p2');
 end
-disp(err);
+fprintf('num_edge: %d, step: %d\n err: %d\n', num_edge, step, err);
 
 
 
